@@ -1,0 +1,141 @@
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts b/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts
+index 2b135d361ffb..6a746fc0e91d 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts
+@@ -151,6 +151,35 @@ cpu {
+ 			};
+ 		};
+ 	};
++
++    reg_cam0: regulator-cam0 {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_cam0>;
++		compatible = "regulator-fixed";
++		regulator-name = "reg_cam0";
++		gpio = <&gpio4 21 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++    reg_cam1: regulator-cam1 {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_cam1>;
++		compatible = "regulator-fixed";
++		regulator-name = "reg_cam1";
++		gpio = <&gpio5 28 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	cam24m: cam24m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <24000000>;
++		clock-output-names = "cam24m";
++	};
+ };
+ 
+ &aud2htx {
+@@ -223,6 +252,24 @@ typec_dr_sw: endpoint {
+ 		};
+ 	};
+ 
++    imx219_0: sensor@10 {
++		compatible = "sony,imx219";
++		reg = <0x10>;
++        clocks = <&cam24m>;
++        VDIG-supply = <&reg_cam0>;
++
++		port {
++			/* MIPI CSI-2 bus endpoint */
++			imx219_to_mipi0_csi2: endpoint {
++				remote-endpoint = <&mipi_csi0_ep>;
++				clock-lanes = <0>;
++				data-lanes = <1 2>;
++				link-frequencies = /bits/ 64 <456000000>;
++			};
++		};
++	};
++
++#if 0
+ 	ov5640_mipi0: ov5640_mipi@3c {
+ 		compatible = "ovti,ov5640";
+ 		reg = <0x3c>;
+@@ -252,6 +299,7 @@ ov5640_mipi_0_ep: endpoint {
+ 			};
+ 		};
+ 	};
++#endif
+ 
+ 	/* DS1337 RTC module */
+ 	rtc@68 {
+@@ -302,6 +350,24 @@ &i2c4 {
+ 	sda-gpios = <&gpio5 21 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ 
++    imx219_1: sensor@10 {
++		compatible = "sony,imx219";
++		reg = <0x10>;
++        clocks = <&cam24m>;
++        VDIG-supply = <&reg_cam1>;
++
++		port {
++			/* MIPI CSI-2 bus endpoint */
++			imx219_to_mipi1_csi2: endpoint {
++				remote-endpoint = <&mipi_csi1_ep>;
++				clock-lanes = <0>;
++				data-lanes = <1 2>;
++				link-frequencies = /bits/ 64 <456000000>;
++			};
++		};
++	};
++
++#if 0
+ 	ov5640_mipi1: ov5640_mipi@3c {
+ 		compatible = "ovti,ov5640";
+ 		reg = <0x3c>;
+@@ -331,6 +397,7 @@ ov5640_mipi_1_ep: endpoint {
+ 			};
+ 		};
+ 	};
++#endif
+ 
+ 	pca6408_1: gpio@20 {
+ 		compatible = "nxp,pcal6408";
+@@ -556,7 +623,7 @@ &mipi_csi_0 {
+ 	port@0 {
+ 		reg = <0>;
+ 		mipi_csi0_ep: endpoint {
+-			remote-endpoint = <&ov5640_mipi_0_ep>;
++			remote-endpoint = <&imx219_to_mipi0_csi2>;
+ 			data-lanes = <2>;
+ 			csis-hs-settle = <13>;
+ 			csis-clk-settle = <2>;
+@@ -573,7 +640,7 @@ &mipi_csi_1 {
+ 	port@1 {
+ 		reg = <1>;
+ 		mipi_csi1_ep: endpoint {
+-			remote-endpoint = <&ov5640_mipi_1_ep>;
++			remote-endpoint = <&imx219_to_mipi1_csi2>;
+ 			data-lanes = <2>;
+ 			csis-hs-settle = <13>;
+ 			csis-clk-settle = <2>;
+@@ -891,4 +958,16 @@ pinctrl_rtc: rtcgrp {
+ 			MX8MP_IOMUXC_GPIO1_IO15__GPIO1_IO15 				0x1c0
+ 		>;
+ 	};
++
++    pinctrl_reg_cam0: camgrp0 {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21 				0x110
++		>;
++    };
++
++    pinctrl_reg_cam1: camgrp1 {
++		fsl,pins = <
++			MX8MP_IOMUXC_UART4_RXD__GPIO5_IO28 				0x110
++		>;
++    };
+ };

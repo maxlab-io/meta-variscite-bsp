@@ -47,6 +47,7 @@ SRCREV:imx93-var-som = "da2218c723da2323ae744b8ba71a93802a23f976"
 LINUX_VERSION:imx93-var-som = "5.15.71"
 
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
+SRC_URI += "file://add_imx219.patch"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
