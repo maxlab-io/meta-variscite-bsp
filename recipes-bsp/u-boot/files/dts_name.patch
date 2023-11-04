@@ -1,0 +1,13 @@
+diff --git a/include/configs/imx8mp_var_dart.h b/include/configs/imx8mp_var_dart.h
+index 19e877cb5a..decc4a255c 100644
+--- a/include/configs/imx8mp_var_dart.h
++++ b/include/configs/imx8mp_var_dart.h
+@@ -90,7 +90,7 @@
+ 	"fdt_high=0xffffffffffffffff\0"		\
+ 	"boot_fdt=try\0" \
+ 	"boot_fit=no\0" \
+-	"fdt_file=undefined\0" \
++	"fdt_file=imx8mp-var-dart-dt8mcustomboard.dtb\0" \
+ 	"bootm_size=0x10000000\0" \
+ 	"ip_dyn=yes\0" \
+ 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \

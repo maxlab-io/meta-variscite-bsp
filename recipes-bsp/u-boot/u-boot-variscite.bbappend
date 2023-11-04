@@ -1,0 +1,1 @@
+SRC_URI += "file://dts_name.patch"
