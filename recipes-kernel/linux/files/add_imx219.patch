@@ -1,12 +1,13 @@
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts b/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts
-index 2b135d361ffb..6a746fc0e91d 100644
+index 2b135d361ffb..1afc18f46f83 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-var-dart-dt8mcustomboard.dts
-@@ -151,6 +151,35 @@ cpu {
+@@ -151,6 +151,37 @@ cpu {
  			};
  		};
  	};
 +
++    /*
 +    reg_cam0: regulator-cam0 {
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_reg_cam0>;
@@ -28,6 +29,7 @@ index 2b135d361ffb..6a746fc0e91d 100644
 +		regulator-min-microvolt = <1800000>;
 +		regulator-max-microvolt = <1800000>;
 +	};
++    */
 +
 +	cam24m: cam24m {
 +		compatible = "fixed-clock";
@@ -38,18 +40,19 @@ index 2b135d361ffb..6a746fc0e91d 100644
  };
  
  &aud2htx {
-@@ -223,6 +252,24 @@ typec_dr_sw: endpoint {
+@@ -223,6 +254,61 @@ typec_dr_sw: endpoint {
  		};
  	};
  
++    /*
 +    imx219_0: sensor@10 {
-+		compatible = "sony,imx219";
++		compatible = "sony,imx219-vvcam";
 +		reg = <0x10>;
 +        clocks = <&cam24m>;
 +        VDIG-supply = <&reg_cam0>;
++        status = "okay";
 +
 +		port {
-+			/* MIPI CSI-2 bus endpoint */
 +			imx219_to_mipi0_csi2: endpoint {
 +				remote-endpoint = <&mipi_csi0_ep>;
 +				clock-lanes = <0>;
@@ -58,31 +61,90 @@ index 2b135d361ffb..6a746fc0e91d 100644
 +			};
 +		};
 +	};
++    */
++
++
++	ov5647_0: ov5647@36 {
++		compatible = "ovti,ov5647";
++		reg = <0x36>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_cam0>;
++		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
++		clock-names = "xclk";
++		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
++		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
++		assigned-clock-rates = <24000000>;
++		csi_id = <0>;
++		pwn-gpios = <&gpio4 21 GPIO_ACTIVE_HIGH>;
++		mclk = <24000000>;
++		mclk_source = <0>;
++
++		mipi_csi;
++		status = "okay";
++        /*
++		VANA-supply = <&ov5647_vana_2v8>;
++		VDIG-supply = <&ov5647_vdig_1v8>;
++		VDDL-supply = <&ov5647_vddl_1v2>;
++        */
++		port {
++			ov5647_mipi_0_ep: endpoint {
++				remote-endpoint = <&mipi_csi0_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++				clock-noncontinuous;
++				link-frequencies = /bits/ 64 <500000000>;
++
++			};
++		};
++	};
 +
 +#if 0
  	ov5640_mipi0: ov5640_mipi@3c {
  		compatible = "ovti,ov5640";
  		reg = <0x3c>;
-@@ -252,6 +299,7 @@ ov5640_mipi_0_ep: endpoint {
+@@ -252,8 +338,10 @@ ov5640_mipi_0_ep: endpoint {
  			};
  		};
  	};
 +#endif
  
  	/* DS1337 RTC module */
++    /*
  	rtc@68 {
-@@ -302,6 +350,24 @@ &i2c4 {
+ 		compatible = "dallas,ds1337";
+ 		reg = <0x68>;
+@@ -264,8 +352,10 @@ rtc@68 {
+ 		wakeup-source;
+ 		status = "okay";
+ 	};
++*/
+ 
+ 	/* Capacitive touch controller */
++    /*
+ 	ft5x06_ts: ft5x06_ts@38 {
+ 		compatible = "edt,edt-ft5206";
+ 		reg = <0x38>;
+@@ -281,6 +371,7 @@ ft5x06_ts: ft5x06_ts@38 {
+ 		wakeup-source;
+ 		status = "okay";
+ 	};
++    */
+ };
+ 
+ &i2c3 {
+@@ -302,6 +393,61 @@ &i2c4 {
  	sda-gpios = <&gpio5 21 GPIO_ACTIVE_HIGH>;
  	status = "okay";
  
++    /*
 +    imx219_1: sensor@10 {
-+		compatible = "sony,imx219";
++		compatible = "sony,imx219-vvcam";
 +		reg = <0x10>;
 +        clocks = <&cam24m>;
 +        VDIG-supply = <&reg_cam1>;
++        status = "okay";
 +
 +		port {
-+			/* MIPI CSI-2 bus endpoint */
 +			imx219_to_mipi1_csi2: endpoint {
 +				remote-endpoint = <&mipi_csi1_ep>;
 +				clock-lanes = <0>;
@@ -91,12 +153,48 @@ index 2b135d361ffb..6a746fc0e91d 100644
 +			};
 +		};
 +	};
++    */
++
++	ov5647_1: ov5647@36 {
++		compatible = "ovti,ov5647";
++		reg = <0x36>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_cam1>;
++		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
++		clock-names = "xclk";
++		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
++		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
++		assigned-clock-rates = <24000000>;
++		csi_id = <1>;
++		pwn-gpios = <&gpio5 28 GPIO_ACTIVE_HIGH>;
++		mclk = <24000000>;
++		mclk_source = <0>;
++
++		mipi_csi;
++		status = "okay";
++        /*
++		VANA-supply = <&ov5647_vana_2v8>;
++		VDIG-supply = <&ov5647_vdig_1v8>;
++		VDDL-supply = <&ov5647_vddl_1v2>;
++        */
++		port {
++			ov5647_mipi_1_ep: endpoint {
++				remote-endpoint = <&mipi_csi1_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++				clock-noncontinuous;
++				link-frequencies = /bits/ 64 <500000000>;
++
++			};
++		};
++	};
++
 +
 +#if 0
  	ov5640_mipi1: ov5640_mipi@3c {
  		compatible = "ovti,ov5640";
  		reg = <0x3c>;
-@@ -331,6 +397,7 @@ ov5640_mipi_1_ep: endpoint {
+@@ -331,6 +477,7 @@ ov5640_mipi_1_ep: endpoint {
  			};
  		};
  	};
@@ -104,38 +202,820 @@ index 2b135d361ffb..6a746fc0e91d 100644
  
  	pca6408_1: gpio@20 {
  		compatible = "nxp,pcal6408";
-@@ -556,7 +623,7 @@ &mipi_csi_0 {
+@@ -357,6 +504,18 @@ &isp0_reserved {
+ 	status = "disabled";
+ };
+ 
++&isp_0 {
++	status = "okay";
++};
++
++&isp_1 {
++	status = "okay";
++};
++
++&dewarp {
++    status = "okay";
++};
++
+ &flexcan1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_flexcan1>;
+@@ -556,7 +715,7 @@ &mipi_csi_0 {
  	port@0 {
  		reg = <0>;
  		mipi_csi0_ep: endpoint {
 -			remote-endpoint = <&ov5640_mipi_0_ep>;
-+			remote-endpoint = <&imx219_to_mipi0_csi2>;
++			remote-endpoint = <&ov5647_mipi_0_ep>;
  			data-lanes = <2>;
  			csis-hs-settle = <13>;
  			csis-clk-settle = <2>;
-@@ -573,7 +640,7 @@ &mipi_csi_1 {
+@@ -569,11 +728,10 @@ &mipi_csi_1 {
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+ 	status = "okay";
+-
  	port@1 {
  		reg = <1>;
  		mipi_csi1_ep: endpoint {
 -			remote-endpoint = <&ov5640_mipi_1_ep>;
-+			remote-endpoint = <&imx219_to_mipi1_csi2>;
++			remote-endpoint = <&ov5647_mipi_1_ep>;
  			data-lanes = <2>;
  			csis-hs-settle = <13>;
  			csis-clk-settle = <2>;
-@@ -891,4 +958,16 @@ pinctrl_rtc: rtcgrp {
+@@ -594,7 +752,7 @@ cap_device {
+ 	};
+ 
+ 	m2m_device {
+-		status = "okay";
++		status = "disabled";
+ 	};
+ };
+ 
+@@ -891,4 +1049,16 @@ pinctrl_rtc: rtcgrp {
  			MX8MP_IOMUXC_GPIO1_IO15__GPIO1_IO15 				0x1c0
  		>;
  	};
 +
 +    pinctrl_reg_cam0: camgrp0 {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21 				0x110
++			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21 				0xc6
 +		>;
 +    };
 +
 +    pinctrl_reg_cam1: camgrp1 {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_UART4_RXD__GPIO5_IO28 				0x110
++			MX8MP_IOMUXC_UART4_RXD__GPIO5_IO28 				0xc6
 +		>;
 +    };
  };
+diff --git a/drivers/media/i2c/imx219.c b/drivers/media/i2c/imx219.c
+index e10af3f74b38..7dbca2cea672 100644
+--- a/drivers/media/i2c/imx219.c
++++ b/drivers/media/i2c/imx219.c
+@@ -601,8 +601,10 @@ static int imx219_read_reg(struct imx219 *imx219, u16 reg, u32 len, u32 *val)
+ 	msgs[1].buf = &data_buf[4 - len];
+ 
+ 	ret = i2c_transfer(client->adapter, msgs, ARRAY_SIZE(msgs));
+-	if (ret != ARRAY_SIZE(msgs))
++	if (ret != ARRAY_SIZE(msgs)) {
++		dev_err(&client->dev, "failed to read reg %x %d %d\n", reg, len, ret);
+ 		return -EIO;
++    }
+ 
+ 	*val = get_unaligned_be32(data_buf);
+ 
+@@ -1061,6 +1063,13 @@ static int imx219_start_streaming(struct imx219 *imx219)
+ 	if (ret)
+ 		goto err_rpm_put;
+ 
++    ret = imx219_write_reg(imx219, IMX219_REG_TEST_PATTERN,
++                        IMX219_REG_VALUE_16BIT, 1);
++	if (ret)
++		goto err_rpm_put;
++
++    dev_info(&client->dev, "%s started\n", __func__);
++
+ 	/* set stream on register */
+ 	ret = imx219_write_reg(imx219, IMX219_REG_MODE_SELECT,
+ 			       IMX219_REG_VALUE_08BIT, IMX219_MODE_STREAMING);
+@@ -1074,6 +1083,7 @@ static int imx219_start_streaming(struct imx219 *imx219)
+ 	return 0;
+ 
+ err_rpm_put:
++    dev_info(&client->dev, "%s failed %d\n", __func__, ret);
+ 	pm_runtime_put(&client->dev);
+ 	return ret;
+ }
+@@ -1112,6 +1122,7 @@ static int imx219_set_stream(struct v4l2_subdev *sd, int enable)
+ 		 * and then start streaming.
+ 		 */
+ 		ret = imx219_start_streaming(imx219);
++        v4l2_info(sd, "start streaming %d\n", ret);
+ 		if (ret)
+ 			goto err_unlock;
+ 	} else {
+@@ -1231,8 +1242,8 @@ static int imx219_identify_module(struct imx219 *imx219)
+ 	ret = imx219_read_reg(imx219, IMX219_REG_CHIP_ID,
+ 			      IMX219_REG_VALUE_16BIT, &val);
+ 	if (ret) {
+-		dev_err(&client->dev, "failed to read chip id %x\n",
+-			IMX219_CHIP_ID);
++		dev_err(&client->dev, "failed to read chip id %x %d\n",
++                IMX219_CHIP_ID, ret);
+ 		return ret;
+ 	}
+ 
+@@ -1245,7 +1256,14 @@ static int imx219_identify_module(struct imx219 *imx219)
+ 	return 0;
+ }
+ 
++static int imx219_s_power(struct v4l2_subdev *sd, int on)
++{
++	return 0;
++}
++
+ static const struct v4l2_subdev_core_ops imx219_core_ops = {
++	.s_power = imx219_s_power,
++	.log_status = v4l2_ctrl_subdev_log_status,
+ 	.subscribe_event = v4l2_ctrl_subdev_subscribe_event,
+ 	.unsubscribe_event = v4l2_event_subdev_unsubscribe,
+ };
+@@ -1443,6 +1461,17 @@ static int imx219_check_hwcfg(struct device *dev)
+ 	return ret;
+ }
+ 
++static int imx219_link_setup(struct media_entity *entity,
++			     const struct media_pad *local,
++			     const struct media_pad *remote, u32 flags)
++{
++	return 0;
++}
++
++static const struct media_entity_operations imx219_sd_media_ops = {
++	.link_setup = imx219_link_setup,
++};
++
+ static int imx219_probe(struct i2c_client *client)
+ {
+ 	struct device *dev = &client->dev;
+@@ -1524,6 +1553,7 @@ static int imx219_probe(struct i2c_client *client)
+ 	imx219->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE |
+ 			    V4L2_SUBDEV_FL_HAS_EVENTS;
+ 	imx219->sd.entity.function = MEDIA_ENT_F_CAM_SENSOR;
++	imx219->sd.entity.ops = &imx219_sd_media_ops;
+ 
+ 	/* Initialize source pad */
+ 	imx219->pad.flags = MEDIA_PAD_FL_SOURCE;
+@@ -1548,6 +1578,8 @@ static int imx219_probe(struct i2c_client *client)
+ 	pm_runtime_enable(dev);
+ 	pm_runtime_idle(dev);
+ 
++    dev_info(dev, "successfully probed\n");
++
+ 	return 0;
+ 
+ error_media_entity:
+diff --git a/drivers/media/v4l2-core/v4l2-async.c b/drivers/media/v4l2-core/v4l2-async.c
+index 7510bb9f6024..e9e46c5ec323 100644
+--- a/drivers/media/v4l2-core/v4l2-async.c
++++ b/drivers/media/v4l2-core/v4l2-async.c
+@@ -492,6 +492,8 @@ static int __v4l2_async_notifier_register(struct v4l2_async_notifier *notifier)
+ {
+ 	struct v4l2_async_subdev *asd;
+ 	int ret, i = 0;
++	struct device *dev =
++		notifier->v4l2_dev ? notifier->v4l2_dev->dev : NULL;
+ 
+ 	INIT_LIST_HEAD(&notifier->waiting);
+ 	INIT_LIST_HEAD(&notifier->done);
+@@ -500,8 +502,10 @@ static int __v4l2_async_notifier_register(struct v4l2_async_notifier *notifier)
+ 
+ 	list_for_each_entry(asd, &notifier->asd_list, asd_list) {
+ 		ret = v4l2_async_notifier_asd_valid(notifier, asd, i++);
+-		if (ret)
++		if (ret) {
++			dev_err(dev, "asd invalid: %d\n", ret);
+ 			goto err_unlock;
++        }
+ 
+ 		list_add_tail(&asd->list, &notifier->waiting);
+ 	}
+diff --git a/drivers/media/v4l2-core/v4l2-device.c b/drivers/media/v4l2-core/v4l2-device.c
+index d2e58ae91f9b..77c00574e195 100644
+--- a/drivers/media/v4l2-core/v4l2-device.c
++++ b/drivers/media/v4l2-core/v4l2-device.c
+@@ -197,11 +197,15 @@ int __v4l2_device_register_subdev_nodes(struct v4l2_device *v4l2_dev,
+ 	 * V4L2_SUBDEV_FL_HAS_DEVNODE flag.
+ 	 */
+ 	list_for_each_entry(sd, &v4l2_dev->subdevs, list) {
+-		if (!(sd->flags & V4L2_SUBDEV_FL_HAS_DEVNODE))
++		if (!(sd->flags & V4L2_SUBDEV_FL_HAS_DEVNODE)) {
++			v4l2_info(v4l2_dev, "dev %s does not have devnode\n", sd->name);
+ 			continue;
++        }
+ 
+-		if (sd->devnode)
++		if (sd->devnode) {
++			v4l2_info(v4l2_dev, "dev %s already has devnode\n", sd->name);
+ 			continue;
++        }
+ 
+ 		vdev = kzalloc(sizeof(*vdev), GFP_KERNEL);
+ 		if (!vdev) {
+@@ -222,6 +226,7 @@ int __v4l2_device_register_subdev_nodes(struct v4l2_device *v4l2_dev,
+ 		err = __video_register_device(vdev, VFL_TYPE_SUBDEV, -1, 1,
+ 					      sd->owner);
+ 		if (err < 0) {
++			v4l2_err(v4l2_dev, "dev %s register failed %d\n", sd->name, err);
+ 			sd->devnode = NULL;
+ 			kfree(vdev);
+ 			goto clean_up;
+@@ -239,6 +244,7 @@ int __v4l2_device_register_subdev_nodes(struct v4l2_device *v4l2_dev,
+ 						      MEDIA_LNK_FL_ENABLED |
+ 						      MEDIA_LNK_FL_IMMUTABLE);
+ 			if (!link) {
++                v4l2_err(v4l2_dev, "dev %s failed to create intf link\n", sd->name);
+ 				err = -ENOMEM;
+ 				goto clean_up;
+ 			}
+diff --git a/drivers/media/v4l2-core/v4l2-subdev.c b/drivers/media/v4l2-core/v4l2-subdev.c
+index 5d27a27cc2f2..6a4e0cee66e8 100644
+--- a/drivers/media/v4l2-core/v4l2-subdev.c
++++ b/drivers/media/v4l2-core/v4l2-subdev.c
+@@ -425,8 +425,10 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg)
+ 					  vdev, sd->v4l2_dev->mdev, arg);
+ 
+ 	case VIDIOC_DQEVENT:
+-		if (!(sd->flags & V4L2_SUBDEV_FL_HAS_EVENTS))
++		if (!(sd->flags & V4L2_SUBDEV_FL_HAS_EVENTS)) {
++			dev_err(NULL, "vidioc_dqevent: sd->flags %08x %08x\n", sd->flags, V4L2_SUBDEV_FL_HAS_EVENTS);
+ 			return -ENOIOCTLCMD;
++        }
+ 
+ 		return v4l2_event_dequeue(vfh, arg, file->f_flags & O_NONBLOCK);
+ 
+diff --git a/drivers/staging/media/imx/imx8-isi-cap.c b/drivers/staging/media/imx/imx8-isi-cap.c
+index 6f83ba47f919..b4707114d96d 100644
+--- a/drivers/staging/media/imx/imx8-isi-cap.c
++++ b/drivers/staging/media/imx/imx8-isi-cap.c
+@@ -132,18 +132,18 @@ static int mxc_isi_pipeline_enable(struct mxc_isi_cap_dev *isi_cap, bool enable)
+ 
+ 	while ((entity = media_graph_walk_next(&graph))) {
+ 		if (!entity) {
+-			dev_dbg(dev, "entity is NULL\n");
++			dev_info(dev, "entity is NULL\n");
+ 			continue;
+ 		}
+ 
+ 		if (!is_media_entity_v4l2_subdev(entity)) {
+-			dev_dbg(dev, "%s is no v4l2 subdev\n", entity->name);
++			dev_info(dev, "%s is no v4l2 subdev\n", entity->name);
+ 			continue;
+ 		}
+ 
+ 		subdev = media_entity_to_v4l2_subdev(entity);
+ 		if (!subdev) {
+-			dev_dbg(dev, "%s subdev is NULL\n", entity->name);
++			dev_info(dev, "%s subdev is NULL\n", entity->name);
+ 			continue;
+ 		}
+ 
+@@ -182,7 +182,7 @@ void mxc_isi_cap_frame_write_done(struct mxc_isi_dev *mxc_isi)
+ 	 */
+ 	if ((is_buf_active(mxc_isi, 1) && buf->id == MXC_ISI_BUF1) ||
+ 	    (is_buf_active(mxc_isi, 2) && buf->id == MXC_ISI_BUF2)) {
+-		dev_dbg(dev, "status=0x%x id=%d\n", mxc_isi->status, buf->id);
++		dev_info(dev, "status=0x%x id=%d\n", mxc_isi->status, buf->id);
+ 		goto unlock;
+ 	}
+ 
+@@ -208,6 +208,7 @@ void mxc_isi_cap_frame_write_done(struct mxc_isi_dev *mxc_isi)
+ 		buf->v4l2_buf.sequence = isi_cap->frame_count;
+ 		mxc_isi_channel_set_outbuf(mxc_isi, buf);
+ 		list_move_tail(isi_cap->out_discard.next, &isi_cap->out_active);
++        dev_warn(dev, "got frame into discard\n");
+ 		goto unlock;
+ 	}
+ 
+@@ -256,7 +257,7 @@ static int cap_vb2_queue_setup(struct vb2_queue *q,
+ 		sizes[i] = format->plane_fmt[i].sizeimage;
+ 	}
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s, buf_n=%d, size=%d\n",
++	dev_info(&isi_cap->pdev->dev, "%s, buf_n=%d, size=%d\n",
+ 		__func__, *num_buffers, sizes[0]);
+ 
+ 	return 0;
+@@ -269,8 +270,6 @@ static int cap_vb2_buffer_prepare(struct vb2_buffer *vb2)
+ 	struct mxc_isi_frame *dst_f = &isi_cap->dst_f;
+ 	int i;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
+-
+ 	if (!isi_cap->dst_f.fmt)
+ 		return -EINVAL;
+ 
+@@ -337,7 +336,7 @@ static int cap_vb2_start_streaming(struct vb2_queue *q, unsigned int count)
+ 	int i, j;
+ 	int ret;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	if (count < 2) {
+ 		ret = -ENOBUFS;
+@@ -369,7 +368,7 @@ static int cap_vb2_start_streaming(struct vb2_queue *q, unsigned int count)
+ 			ret = -ENOMEM;
+ 			goto err;
+ 		}
+-		dev_dbg(&isi_cap->pdev->dev,
++		dev_info(&isi_cap->pdev->dev,
+ 			"%s: num_plane=%d discard_size=%d discard_buffer=%p\n"
+ 			, __func__, i,
+ 			PAGE_ALIGN((int)isi_cap->discard_size[i]),
+@@ -442,7 +441,7 @@ static void cap_vb2_stop_streaming(struct vb2_queue *q)
+ 	unsigned long flags;
+ 	int i;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	mxc_isi_channel_disable(mxc_isi);
+ 
+@@ -509,7 +508,7 @@ static int mxc_isi_s_ctrl(struct v4l2_ctrl *ctrl)
+ 	struct mxc_isi_dev *mxc_isi = mxc_isi_get_hostdata(isi_cap->pdev);
+ 	unsigned long flags;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	if (ctrl->flags & V4L2_CTRL_FLAG_INACTIVE)
+ 		return 0;
+@@ -640,20 +639,27 @@ static bool is_entity_link_setup(struct mxc_isi_cap_dev *isi_cap)
+ 	struct video_device *vdev = &isi_cap->vdev;
+ 	struct v4l2_subdev *csi_sd, *sen_sd;
+ 
+-	if (!vdev->entity.num_links || !isi_cap->sd.entity.num_links)
++	if (!vdev->entity.num_links || !isi_cap->sd.entity.num_links) {
++        v4l2_err(&isi_cap->sd, "%s: no links %d %d\n", __func__,
++                vdev->entity.num_links, isi_cap->sd.entity.num_links);
+ 		return false;
++    }
+ 
+ 	csi_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
+-	if (!csi_sd || !csi_sd->entity.num_links)
++	if (!csi_sd || !csi_sd->entity.num_links) {
++        v4l2_err(&isi_cap->sd, "%s: no csi %p\n", __func__, csi_sd);
+ 		return false;
++    }
+ 
+ 	/* No sensor subdev for hdmi rx */
+ 	if (strstr(csi_sd->name, "hdmi"))
+ 		return true;
+ 
+ 	sen_sd = mxc_get_remote_subdev(csi_sd, __func__);
+-	if (!sen_sd || !sen_sd->entity.num_links)
++	if (!sen_sd || !sen_sd->entity.num_links) {
++        v4l2_err(csi_sd, "%s: no sen %p\n", __func__, sen_sd);
+ 		return false;
++    }
+ 
+ 	return true;
+ }
+@@ -722,6 +728,7 @@ static int mxc_isi_capture_open(struct file *file)
+ 	mutex_lock(&isi_cap->lock);
+ 	ret = v4l2_fh_open(file);
+ 	if (ret) {
++		dev_err(dev, "%s %d\n", __func__, __LINE__);
+ 		mutex_unlock(&isi_cap->lock);
+ 		return ret;
+ 	}
+@@ -739,6 +746,7 @@ static int mxc_isi_capture_open(struct file *file)
+ 	mxc_isi->cap_enabled = true;
+ 	mutex_unlock(&mxc_isi->lock);
+ 
++    dev_info(dev, "%s: ret %d\n", __func__, ret);
+ 	return ret;
+ }
+ 
+@@ -813,7 +821,7 @@ static int mxc_isi_cap_enum_fmt(struct file *file, void *priv,
+ 	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
+ 	struct mxc_isi_fmt *fmt;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 	if (f->index >= (int)mxc_isi_out_formats_size)
+ 		return -EINVAL;
+ 
+@@ -834,7 +842,7 @@ static int mxc_isi_cap_g_fmt_mplane(struct file *file, void *fh,
+ 	struct mxc_isi_frame *dst_f = &isi_cap->dst_f;
+ 	int i;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	pix->width = dst_f->o_width;
+ 	pix->height = dst_f->o_height;
+@@ -862,7 +870,7 @@ static int mxc_isi_cap_try_fmt_mplane(struct file *file, void *fh,
+ 	int bpl;
+ 	int i;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	for (i = 0; i < mxc_isi_out_formats_size; i++) {
+ 		fmt = &mxc_isi_out_formats[i];
+@@ -971,6 +979,9 @@ static int mxc_isi_source_fmt_init(struct mxc_isi_cap_dev *isi_cap)
+ 
+ 	set_frame_bounds(src_f, src_fmt.format.width, src_fmt.format.height);
+ 
++    v4l2_info(&isi_cap->sd, "%s src %d %d %s dst %d %d %s\n", __func__,
++              src_f->width, src_f->height, src_f->fmt->name, dst_f->width, dst_f->height, dst_f->fmt->name);
++
+ 	if (dst_f->width > src_f->width || dst_f->height > src_f->height) {
+ 		dev_err(&isi_cap->pdev->dev,
+ 			"%s: src:(%d,%d), dst:(%d,%d) Not support upscale\n",
+@@ -1002,9 +1013,12 @@ static int mxc_isi_cap_s_fmt_mplane(struct file *file, void *priv,
+ 	 * Step5: Update mxc isi channel configuration.
+ 	 */
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s, fmt=0x%X\n", __func__, pix->pixelformat);
+-	if (vb2_is_busy(&isi_cap->vb2_q))
++	dev_info(&isi_cap->pdev->dev, "%s, fmt=0x%X\n", __func__, pix->pixelformat);
++    v4l2_info(&isi_cap->sd, "%s\n", __func__);
++	if (vb2_is_busy(&isi_cap->vb2_q)) {
++        v4l2_info(&isi_cap->sd, "%s vb2 busy\n", __func__);
+ 		return -EBUSY;
++    }
+ 
+ 	for (i = 0; i < mxc_isi_out_formats_size; i++) {
+ 		fmt = &mxc_isi_out_formats[i];
+@@ -1118,7 +1132,7 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
+ 	struct v4l2_subdev *src_sd;
+ 	int ret;
+ 
+-	dev_dbg(dev, "%s\n", __func__);
++	dev_info(dev, "%s\n", __func__);
+ 
+ 	if (!isi_cap->is_streaming[isi_cap->id]) {
+ 		src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
+@@ -1127,6 +1141,7 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
+ 			v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
+ 			return ret;
+ 		}
++        dev_info(dev, "Subdev %s powered on", isi_cap->sd.name);
+ 
+ 		ret = mxc_isi_config_parm(isi_cap);
+ 		if (ret < 0)
+@@ -1170,7 +1185,7 @@ static int mxc_isi_cap_streamoff(struct file *file, void *priv,
+ 	struct v4l2_subdev *src_sd;
+ 	int ret;
+ 
+-	dev_dbg(dev, "%s\n", __func__);
++	dev_info(dev, "%s\n", __func__);
+ 
+ 	ret = vb2_ioctl_streamoff(file, priv, type);
+ 	if (ret < 0)
+@@ -1196,7 +1211,7 @@ static int mxc_isi_cap_g_selection(struct file *file, void *fh,
+ 	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
+ 	struct mxc_isi_frame *f = &isi_cap->dst_f;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	if (s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT &&
+ 	    s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
+@@ -1244,7 +1259,7 @@ static int mxc_isi_cap_s_selection(struct file *file, void *fh,
+ 	struct v4l2_rect rect = s->r;
+ 	unsigned long flags;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 	if (s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT &&
+ 	    s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
+ 		return -EINVAL;
+@@ -1552,7 +1567,7 @@ static int mxc_isi_subdev_set_fmt(struct v4l2_subdev *sd,
+ 	set_frame_bounds(dst_f, mf->width, mf->height);
+ 	mutex_unlock(&isi_cap->lock);
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "pad%d: code: 0x%x, %dx%d",
++	dev_info(&isi_cap->pdev->dev, "pad%d: code: 0x%x, %dx%d",
+ 		fmt->pad, mf->code, mf->width, mf->height);
+ 
+ 	return 0;
+@@ -1602,7 +1617,7 @@ static int mxc_isi_subdev_get_selection(struct v4l2_subdev *sd,
+ 		r->height = f->height;
+ 	}
+ 
+-	dev_dbg(&isi_cap->pdev->dev,
++	dev_info(&isi_cap->pdev->dev,
+ 		"%s, target %#x: l:%d, t:%d, %dx%d, f_w: %d, f_h: %d",
+ 		__func__, sel->pad, r->left, r->top, r->width, r->height,
+ 		f->c_width, f->c_height);
+@@ -1644,7 +1659,7 @@ static int mxc_isi_subdev_set_selection(struct v4l2_subdev *sd,
+ 		spin_unlock_irqrestore(&isi_cap->slock, flags);
+ 	}
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s, target %#x: (%d,%d)/%dx%d", __func__,
++	dev_info(&isi_cap->pdev->dev, "%s, target %#x: (%d,%d)/%dx%d", __func__,
+ 		sel->target, r->left, r->top, r->width, r->height);
+ 
+ 	mutex_unlock(&isi_cap->lock);
+@@ -1671,7 +1686,7 @@ static int mxc_isi_register_cap_device(struct mxc_isi_cap_dev *isi_cap,
+ 	struct vb2_queue *q = &isi_cap->vb2_q;
+ 	int ret = -ENOMEM;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 	memset(vdev, 0, sizeof(*vdev));
+ 	snprintf(vdev->name, sizeof(vdev->name), "mxc_isi.%d.capture", isi_cap->id);
+ 
+@@ -1743,7 +1758,7 @@ static int mxc_isi_subdev_registered(struct v4l2_subdev *sd)
+ 	if (!isi_cap)
+ 		return -ENXIO;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	ret = mxc_isi_register_cap_device(isi_cap, sd->v4l2_dev);
+ 	if (ret < 0)
+@@ -1760,7 +1775,7 @@ static void mxc_isi_subdev_unregistered(struct v4l2_subdev *sd)
+ 	if (!isi_cap)
+ 		return;
+ 
+-	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
++	dev_info(&isi_cap->pdev->dev, "%s\n", __func__);
+ 
+ 	mutex_lock(&isi_cap->lock);
+ 	vdev = &isi_cap->vdev;
+diff --git a/drivers/staging/media/imx/imx8-isi-core.c b/drivers/staging/media/imx/imx8-isi-core.c
+index 8f71f263112e..a8e635c75e75 100644
+--- a/drivers/staging/media/imx/imx8-isi-core.c
++++ b/drivers/staging/media/imx/imx8-isi-core.c
+@@ -58,27 +58,29 @@ static irqreturn_t mxc_isi_irq_handler(int irq, void *priv)
+ 			mxc_isi_m2m_frame_write_done(mxc_isi);
+ 		else
+ 			mxc_isi_cap_frame_write_done(mxc_isi);
+-	}
++	} else {
++		dev_info(dev, "%s, no frm_strd stat=0x%X\n", __func__, status);
++    }
+ 
+ 	if (status & (CHNL_STS_AXI_WR_ERR_Y_MASK |
+ 		      CHNL_STS_AXI_WR_ERR_U_MASK |
+ 		      CHNL_STS_AXI_WR_ERR_V_MASK))
+-		dev_dbg(dev, "%s, IRQ AXI Error stat=0x%X\n", __func__, status);
++		dev_info(dev, "%s, IRQ AXI Error stat=0x%X\n", __func__, status);
+ 
+ 	if (status & (ier_reg->panic_y_buf_en.mask |
+ 		      ier_reg->panic_u_buf_en.mask |
+ 		      ier_reg->panic_v_buf_en.mask))
+-		dev_dbg(dev, "%s, IRQ Panic OFLW Error stat=0x%X\n", __func__, status);
++		dev_info(dev, "%s, IRQ Panic OFLW Error stat=0x%X\n", __func__, status);
+ 
+ 	if (status & (ier_reg->oflw_y_buf_en.mask |
+ 		      ier_reg->oflw_u_buf_en.mask |
+ 		      ier_reg->oflw_v_buf_en.mask))
+-		dev_dbg(dev, "%s, IRQ OFLW Error stat=0x%X\n", __func__, status);
++		dev_info(dev, "%s, IRQ OFLW Error stat=0x%X\n", __func__, status);
+ 
+ 	if (status & (ier_reg->excs_oflw_y_buf_en.mask |
+ 		      ier_reg->excs_oflw_u_buf_en.mask |
+ 		      ier_reg->excs_oflw_v_buf_en.mask))
+-		dev_dbg(dev, "%s, IRQ EXCS OFLW Error stat=0x%X\n", __func__, status);
++		dev_info(dev, "%s, IRQ EXCS OFLW Error stat=0x%X\n", __func__, status);
+ 
+ 	spin_unlock_irqrestore(&mxc_isi->slock, flags);
+ 	return IRQ_HANDLED;
+@@ -613,7 +615,7 @@ static int mxc_isi_parse_dt(struct mxc_isi_dev *mxc_isi)
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	dev_dbg(dev, "%s, isi_%d,interface(%d, %d, %d)\n", __func__,
++	dev_info(dev, "%s, isi_%d,interface(%d, %d, %d)\n", __func__,
+ 		mxc_isi->id,
+ 		mxc_isi->interface[0],
+ 		mxc_isi->interface[1],
+diff --git a/drivers/staging/media/imx/imx8-isi-hw.c b/drivers/staging/media/imx/imx8-isi-hw.c
+index 193ff5c5fd33..946804aad0c0 100644
+--- a/drivers/staging/media/imx/imx8-isi-hw.c
++++ b/drivers/staging/media/imx/imx8-isi-hw.c
+@@ -16,7 +16,7 @@ MODULE_VERSION("1.0");
+ 
+ #define	ISI_DOWNSCALE_THRESHOLD		0x4000
+ 
+-#ifdef DEBUG
++#ifndef DEBUG
+ void dump_isi_regs(struct mxc_isi_dev *mxc_isi)
+ {
+ 	struct device *dev = &mxc_isi->pdev->dev;
+@@ -67,10 +67,10 @@ void dump_isi_regs(struct mxc_isi_dev *mxc_isi)
+ 	};
+ 	u32 i;
+ 
+-	dev_dbg(dev, "ISI CHNLC register dump, isi%d\n", mxc_isi->id);
++	dev_info(dev, "ISI CHNLC register dump, isi%d\n", mxc_isi->id);
+ 	for (i = 0; i < ARRAY_SIZE(registers); i++) {
+ 		u32 reg = readl(mxc_isi->regs + registers[i].offset);
+-		dev_dbg(dev, "%20s[0x%.2x]: %.2x\n",
++		dev_info(dev, "%20s[0x%.2x]: %.2x\n",
+ 			registers[i].name, registers[i].offset, reg);
+ 	}
+ }
+diff --git a/drivers/staging/media/imx/imx8-mipi-csi2-sam.c b/drivers/staging/media/imx/imx8-mipi-csi2-sam.c
+index 1d12365520a6..ac8ca4923c1a 100644
+--- a/drivers/staging/media/imx/imx8-mipi-csi2-sam.c
++++ b/drivers/staging/media/imx/imx8-mipi-csi2-sam.c
+@@ -541,11 +541,11 @@ static void dump_csis_regs(struct csi_state *state, const char *label)
+ 	};
+ 	u32 i;
+ 
+-	v4l2_dbg(2, debug, &state->sd, "--- %s ---\n", label);
++	v4l2_info(&state->sd, "--- %s ---\n", label);
+ 
+ 	for (i = 0; i < ARRAY_SIZE(registers); i++) {
+ 		u32 cfg = mipi_csis_read(state, registers[i].offset);
+-		v4l2_dbg(2, debug, &state->sd, "%20s[%x]: 0x%.8x\n", registers[i].name, registers[i].offset, cfg);
++		v4l2_info(&state->sd, "%20s[%x]: 0x%.8x\n", registers[i].name, registers[i].offset, cfg);
+ 	}
+ }
+ 
+@@ -561,11 +561,11 @@ static void dump_gasket_regs(struct csi_state *state, const char *label)
+ 	};
+ 	u32 i, cfg;
+ 
+-	v4l2_dbg(2, debug, &state->sd, "--- %s ---\n", label);
++	v4l2_info(&state->sd, "--- %s ---\n", label);
+ 
+ 	for (i = 0; i < ARRAY_SIZE(registers); i++) {
+ 		regmap_read(state->gasket, registers[i].offset, &cfg);
+-		v4l2_dbg(2, debug, &state->sd, "%20s[%x]: 0x%.8x\n", registers[i].name, registers[i].offset, cfg);
++		v4l2_info(&state->sd, "%20s[%x]: 0x%.8x\n", registers[i].name, registers[i].offset, cfg);
+ 	}
+ }
+ 
+@@ -713,7 +713,7 @@ static void __mipi_csis_set_format(struct csi_state *state)
+ 	struct v4l2_mbus_framefmt *mf = &state->format;
+ 	u32 val;
+ 
+-	v4l2_dbg(1, debug, &state->sd, "fmt: %#x, %d x %d\n",
++	v4l2_info(&state->sd, "fmt: %#x, %d x %d\n",
+ 		 mf->code, mf->width, mf->height);
+ 
+ 	/* Color format */
+@@ -1078,6 +1078,8 @@ static int mipi_csis_s_power(struct v4l2_subdev *mipi_sd, int on)
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 	struct v4l2_subdev *sen_sd;
+ 
++    v4l2_info(mipi_sd, "%s", __func__);
++
+ 	/* Get remote source pad subdev */
+ 	sen_sd = csis_get_remote_subdev(state, __func__);
+ 	if (!sen_sd) {
+@@ -1092,7 +1094,7 @@ static int mipi_csis_s_stream(struct v4l2_subdev *mipi_sd, int enable)
+ {
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 
+-	v4l2_dbg(1, debug, mipi_sd, "%s: %d, state: 0x%x\n",
++	v4l2_info(mipi_sd, "%s: %d, state: 0x%x\n",
+ 		 __func__, enable, state->flags);
+ 
+ 	if (enable) {
+@@ -1165,6 +1167,8 @@ static int mipi_csis_get_fmt(struct v4l2_subdev *mipi_sd,
+ 	struct v4l2_subdev *sen_sd;
+ 	int ret;
+ 
++    v4l2_info(&state->sd, "%s\n", __func__);
++
+ 	/* Get remote source pad */
+ 	source_pad = csis_get_remote_sensor_pad(state);
+ 	if (!source_pad) {
+@@ -1196,6 +1200,8 @@ static int mipi_csis_s_rx_buffer(struct v4l2_subdev *mipi_sd, void *buf,
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 	unsigned long flags;
+ 
++    v4l2_info(&state->sd, "%s %d\n", __func__, *size);
++
+ 	*size = min_t(unsigned int, *size, MIPI_CSIS_PKTDATA_SIZE);
+ 
+ 	spin_lock_irqsave(&state->slock, flags);
+@@ -1212,6 +1218,8 @@ static int mipi_csis_s_frame_interval(struct v4l2_subdev *mipi_sd,
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 	struct v4l2_subdev *sen_sd;
+ 
++    v4l2_info(&state->sd, "%s\n", __func__);
++
+ 	/* Get remote source pad subdev */
+ 	sen_sd = csis_get_remote_subdev(state, __func__);
+ 	if (!sen_sd) {
+@@ -1228,6 +1236,8 @@ static int mipi_csis_g_frame_interval(struct v4l2_subdev *mipi_sd,
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 	struct v4l2_subdev *sen_sd;
+ 
++    v4l2_info(&state->sd, "%s\n", __func__);
++
+ 	/* Get remote source pad subdev */
+ 	sen_sd = csis_get_remote_subdev(state, __func__);
+ 	if (!sen_sd) {
+@@ -1245,6 +1255,8 @@ static int mipi_csis_enum_framesizes(struct v4l2_subdev *mipi_sd,
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 	struct v4l2_subdev *sen_sd;
+ 
++    v4l2_info(&state->sd, "%s\n", __func__);
++
+ 	/* Get remote source pad subdev */
+ 	sen_sd = csis_get_remote_subdev(state, __func__);
+ 	if (!sen_sd) {
+@@ -1262,6 +1274,8 @@ static int mipi_csis_enum_frameintervals(struct v4l2_subdev *mipi_sd,
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+ 	struct v4l2_subdev *sen_sd;
+ 
++    v4l2_info(&state->sd, "%s\n", __func__);
++
+ 	/* Get remote source pad subdev */
+ 	sen_sd = csis_get_remote_subdev(state, __func__);
+ 	if (!sen_sd) {
+@@ -1292,6 +1306,8 @@ static int csis_s_fmt(struct v4l2_subdev *sd, struct csi_sam_format *fmt)
+ 	const struct csis_pix_format *csis_format;
+ 	struct csi_state *state = container_of(sd, struct csi_state, sd);
+ 
++    v4l2_info(&state->sd, "%s %ld\n", __func__, fmt->format);
++
+ 	switch (fmt->format) {
+ 	case V4L2_PIX_FMT_SBGGR10:
+ 	    code = MEDIA_BUS_FMT_SBGGR10_1X10;
+@@ -1336,7 +1352,7 @@ static int csis_s_hdr(struct v4l2_subdev *sd, bool enable)
+ {
+ 	struct csi_state *state = container_of(sd, struct csi_state, sd);
+ 
+-	v4l2_dbg(2, debug, &state->sd, "%s: %d\n", __func__, enable);
++	v4l2_info(&state->sd, "%s: %d\n", __func__, enable);
+ 	state->hdr = enable;
+ 	return 0;
+ }
+@@ -1370,6 +1386,7 @@ static long csis_priv_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg_
+ 	struct csi_state *state = container_of(sd, struct csi_state, sd);
+ 	void *arg = arg_user;
+ 
++    v4l2_info(&state->sd, "%s %u\n", __func__, cmd);
+ 	pm_runtime_get_sync(state->dev);
+ 
+ 	switch (cmd) {
+@@ -1470,11 +1487,11 @@ static irqreturn_t mipi_csis_irq_handler(int irq, void *dev_id)
+ 			if (!(status & state->events[i].mask))
+ 				continue;
+ 			state->events[i].counter++;
+-			v4l2_dbg(2, debug, &state->sd, "%s: %d\n",
++			v4l2_info(&state->sd, "%s: %d\n",
+ 				 state->events[i].name,
+ 				 state->events[i].counter);
+ 		}
+-		v4l2_dbg(2, debug, &state->sd, "status: %08x\n", status);
++		v4l2_info(&state->sd, "status: %08x\n", status);
+ 	}
+ 	spin_unlock_irqrestore(&state->slock, flags);
+ 
+@@ -1849,7 +1866,7 @@ static void mipi_csis_imx8mp_phy_reset(struct csi_state *state)
+ 				(code.code == MEDIA_BUS_FMT_SBGGR8_1X8)) {
+ 			mipi_csis_imx8mp_dewarp_ctl_data_type(state,
+ 					 ISP_DEWARP_CTRL_DATA_TYPE_RAW8);
+-			v4l2_dbg(1, debug, &state->sd,
++			v4l2_info(&state->sd,
+ 					"%s: bus fmt is 8 bit!\n", __func__);
+ 		} else if ((code.code == MEDIA_BUS_FMT_SRGGB10_1X10) ||
+ 				(code.code == MEDIA_BUS_FMT_SGRBG10_1X10) ||
+@@ -1857,12 +1874,12 @@ static void mipi_csis_imx8mp_phy_reset(struct csi_state *state)
+ 				(code.code == MEDIA_BUS_FMT_SBGGR10_1X10)) {
+ 			mipi_csis_imx8mp_dewarp_ctl_data_type(state,
+ 					ISP_DEWARP_CTRL_DATA_TYPE_RAW10);
+-			v4l2_dbg(1, debug, &state->sd,
+-					"%s: bus fmt is 10 bit !\n", __func__);
++			v4l2_info(&state->sd,
++                      "%s: bus fmt is 10 bit %u!\n", __func__, code.code);
+ 		} else {
+ 			mipi_csis_imx8mp_dewarp_ctl_data_type(state,
+ 					ISP_DEWARP_CTRL_DATA_TYPE_RAW12);
+-			v4l2_dbg(1, debug, &state->sd,
++			v4l2_info(&state->sd,
+ 					"%s: bus fmt is 12 bit !\n", __func__);
+ 		}
+ 		goto write_regmap;
+@@ -1871,7 +1888,7 @@ static void mipi_csis_imx8mp_phy_reset(struct csi_state *state)
+ csi_phy_initial_cfg:
+ 	mipi_csis_imx8mp_dewarp_ctl_data_type(state,
+ 			ISP_DEWARP_CTRL_DATA_TYPE_RAW12);
+-	v4l2_dbg(1, debug, &state->sd,
++	v4l2_info(&state->sd,
+ 			"%s: bus fmt is 12 bit !\n", __func__);
+ 
+ write_regmap:
+@@ -1903,6 +1920,8 @@ static int mipi_csis_probe(struct platform_device *pdev)
+ 	const struct of_device_id *of_id;
+ 	int ret = -ENOMEM;
+ 
++    dev_info(dev, "Probing csi2 for %s\n", dev->init_name);
++
+ 	state = devm_kzalloc(dev, sizeof(*state), GFP_KERNEL);
+ 	if (!state)
+ 		return -ENOMEM;
